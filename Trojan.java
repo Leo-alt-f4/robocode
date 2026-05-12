@@ -1,7 +1,7 @@
 import robocode.*;
 import java.awt.Color;
 
-public class Arroz extends AdvancedRobot {
+public class Trojan extends AdvancedRobot {
     int moveDirection = 1;
 
     public void run() {
