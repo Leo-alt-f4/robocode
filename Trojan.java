@@ -28,8 +28,8 @@ public class Trojan extends AdvancedRobot {
 
             acho uma boa no futuro deixar mais randomizado isso, vai ser melhor
         */
-        double radarTurn = getHeadingRadians() + e.getBearingRadians() - getRadarHeadingRadians();
-        setTurnRadarRightRadians(robocode.util.Utils.normalRelativeAngle(radarTurn));
+        // Substitua as duas linhas do radar por esta:
+        setTurnRadarRightRadians(robocode.util.Utils.normalRelativeAngle(getHeadingRadians() + e.getBearingRadians() - getRadarHeadingRadians()) * 2);
 
         setTurnRight(e.getBearing() + 90 - (10 * moveDirection));
 
