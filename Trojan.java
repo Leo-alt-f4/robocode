@@ -1,5 +1,6 @@
 import robocode.*;
 import java.awt.Color;
+import sample.*;
 /*
     Se acharem relevante alterar o nome, coloca aqui o 
     nome anterior para ver se tá melhor o de agr ou de antes
