@@ -15,6 +15,7 @@ public class Trojan extends AdvancedRobot {
         setAdjustRadarForRobotTurn(true);
         setAdjustGunForRobotTurn(true);
 
+        // sempre que ele nao ver um robo, ele vai ficar rodando ate achar
         while(true) {
             turnRadarRight(360);
         }
@@ -23,6 +24,7 @@ public class Trojan extends AdvancedRobot {
     public void onScannedRobot(ScannedRobotEvent e) {
         double distance = e.getDistance();
 
+        // funcao de prioridade: Se o robo escaneado for mais distante que o atual, ignora ele
         if (distance > targetDistance) {
             return;
         }
@@ -30,10 +32,12 @@ public class Trojan extends AdvancedRobot {
         targetDistance = distance;
         double firePower = 3.0;
 
+        // com o robo na area do scanner, ele vai ficar rondando ao redor do robo fazendo movimento giratorio
         setTurnRadarRightRadians(robocode.util.Utils.normalRelativeAngle(getHeadingRadians() + e.getBearingRadians() - getRadarHeadingRadians()) * 2);
         setTurnRight(e.getBearing() + 90 - (10 * moveDirection));
         setAhead(100 * moveDirection);
 
+        // sistema de tiro melhorado com condicionais
         if (distance > 600) {
             firePower = 1.0;
         } else if (distance > 400) {
@@ -44,6 +48,7 @@ public class Trojan extends AdvancedRobot {
             firePower = 3.0;
         }
         
+        // verifica se ta com um angulo bom para acertar o inimigo antes de atirar
         double gunTurn = getHeadingRadians() + e.getBearingRadians() - getGunHeadingRadians();
         setTurnGunRightRadians(robocode.util.Utils.normalRelativeAngle(gunTurn));
 
@@ -51,15 +56,18 @@ public class Trojan extends AdvancedRobot {
             setFire(firePower);
         }
 
+        // reseta o rastreamento para o proximo ciclo
         targetDistance = Double.MAX_VALUE;
     }
 
+    // se bater na parede, vira para o outro lado e se afasta
     public void onHitWall(HitWallEvent e) {
         reverseDirection();
         setTurnRight(90); 
         setAhead(150);
     }
 
+    // se bater em outro robo tenta girar para o lado oposto ao dele
     public void onHitRobot(HitRobotEvent e) {
         if (e.getBearing() > -90 && e.getBearing() <= 90) {
             reverseDirection();
