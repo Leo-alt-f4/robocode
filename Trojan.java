@@ -1,11 +1,7 @@
 import robocode.*;
 import java.awt.Color;
 import sample.*;
-/*
-    Se acharem relevante alterar o nome, coloca aqui o 
-    nome anterior para ver se tá melhor o de agr ou de antes
-    apoio colocar como 'CavaloDeTroiaDaSilva'
-*/
+
 public class Trojan extends AdvancedRobot {
     int moveDirection = 1;
 
@@ -13,7 +9,7 @@ public class Trojan extends AdvancedRobot {
         setBodyColor(Color.black);
         setGunColor(Color.white);
         setRadarColor(Color.red);
-        setBulletColor(Color.yellow);
+        setBulletColor(Color.black);
 
         setAdjustRadarForRobotTurn(true);
         setAdjustGunForRobotTurn(true);
@@ -29,8 +25,7 @@ public class Trojan extends AdvancedRobot {
 		double firePower = 3.0;
 		 /* 
             Com o robo na area do scanner, ele vai ficar rondando ao redor do robo fazendo movimento giratorio
-
-            acho uma boa no futuro deixar mais randomizado isso, vai ser melhor
+            Se der, algm ajusta aí pfv
         */
         setTurnRadarRightRadians(robocode.util.Utils.normalRelativeAngle(getHeadingRadians() + e.getBearingRadians() - getRadarHeadingRadians()) * 2);
         setTurnRight(e.getBearing() + 90 - (10 * moveDirection));
@@ -57,7 +52,7 @@ public class Trojan extends AdvancedRobot {
     }
 
     /*
-        tudo isso aq embaixo eh so pra caso do robo bater em algo ou algm, ent isso pode continuar assim (acho eu)
+        vou ajustar hoje se der um tempo
     */
     public void onHitWall(HitWallEvent e) {
         reverseDirection();
