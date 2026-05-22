@@ -24,27 +24,33 @@ public class Trojan extends AdvancedRobot {
     }
 
     public void onScannedRobot(ScannedRobotEvent e) {
-        /* 
+        
+		double distance = e.getDistance();
+		double firePower = 3.0;
+		 /* 
             Com o robo na area do scanner, ele vai ficar rondando ao redor do robo fazendo movimento giratorio
 
             acho uma boa no futuro deixar mais randomizado isso, vai ser melhor
         */
-        // Substitua as duas linhas do radar por esta:
         setTurnRadarRightRadians(robocode.util.Utils.normalRelativeAngle(getHeadingRadians() + e.getBearingRadians() - getRadarHeadingRadians()) * 2);
-
         setTurnRight(e.getBearing() + 90 - (10 * moveDirection));
-
         setAhead(100 * moveDirection);
 
-        /* 
-            se a distancia baseada no raio de scan for menor que 2, ele atira o fodão, senão é o fraquinho
-            tem que dar um jeito de melhorar o sistema de tiro com mais probabilidades
-        */
-        if (e.getDistance() < 200) {
-            fire(3);
-        } else {
-            fire(1);
-        }
+        // sistema de tiro melhorado e agora ele tem mais condicionais (tb criei umas variáveis p ficar mais legível)
+		if (distance > 600) {
+		    firePower = 1.0;
+		} else if (distance > 400) {
+		    firePower = 2.0;
+		} else if (distance > 200) {
+		    firePower = 2.5;
+		} else {
+		    firePower = 3.0;
+		}
+		
+        // melhorei um pouco o sistema de tiro, agora ele tá visualizando se tá com um ângulo bom p acertar o inimigo
+		if (Math.abs(getGunTurnRemaining()) < 10) {
+		    setFire(firePower);
+		}
 
         double gunTurn = getHeadingRadians() + e.getBearingRadians() - getGunHeadingRadians();
         setTurnGunRightRadians(robocode.util.Utils.normalRelativeAngle(gunTurn));
