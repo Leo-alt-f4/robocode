@@ -4,6 +4,7 @@ import sample.*;
 
 public class Trojan extends AdvancedRobot {
     int moveDirection = 1;
+    double targetDistance = Double.MAX_VALUE; // Guarda a distância do alvo atual
 
     public void run() {
         setBodyColor(Color.black);
@@ -20,45 +21,49 @@ public class Trojan extends AdvancedRobot {
     }
 
     public void onScannedRobot(ScannedRobotEvent e) {
+        double distance = e.getDistance();
+
+        // FUNÇÃO DE PRIORIDADE: Se o robô escaneado for mais distante que o atual, ignora ele
+        if (distance > targetDistance) {
+            return; 
+        }
         
-		double distance = e.getDistance();
-		double firePower = 3.0;
-		 /* 
-            Com o robo na area do scanner, ele vai ficar rondando ao redor do robo fazendo movimento giratorio
-            Se der, algm ajusta aí pfv
-        */
+        // Se chegou aqui, este é o robô mais próximo atualizado
+        targetDistance = distance;
+        double firePower = 3.0;
+
+        // Movimento circular ao redor do inimigo
         setTurnRadarRightRadians(robocode.util.Utils.normalRelativeAngle(getHeadingRadians() + e.getBearingRadians() - getRadarHeadingRadians()) * 2);
         setTurnRight(e.getBearing() + 90 - (10 * moveDirection));
         setAhead(100 * moveDirection);
 
-        // sistema de tiro melhorado e agora ele tem mais condicionais (tb criei umas variáveis p ficar mais legível)
-		if (distance > 600) {
-		    firePower = 1.0;
-		} else if (distance > 400) {
-		    firePower = 2.0;
-		} else if (distance > 200) {
-		    firePower = 2.5;
-		} else {
-		    firePower = 3.0;
-		}
-		
-        // melhorei um pouco o sistema de tiro, agora ele tá visualizando se tá com um ângulo bom p acertar o inimigo
-		if (Math.abs(getGunTurnRemaining()) < 10) {
-		    setFire(firePower);
-		}
-
+        // Sistema de tiro por distância
+        if (distance > 600) {
+            firePower = 1.0;
+        } else if (distance > 400) {
+            firePower = 2.0;
+        } else if (distance > 200) {
+            firePower = 2.5;
+        } else {
+            firePower = 3.0;
+        }
+        
+        // Calcula o giro da arma ANTES de tentar atirar
         double gunTurn = getHeadingRadians() + e.getBearingRadians() - getGunHeadingRadians();
         setTurnGunRightRadians(robocode.util.Utils.normalRelativeAngle(gunTurn));
+
+        // Só atira se a arma estiver quase apontada para o alvo
+        if (Math.abs(getGunTurnRemaining()) < 10) {
+            setFire(firePower);
+        }
+
+        // Reseta o rastreamento para o próximo ciclo de escaneamento do radar
+        targetDistance = Double.MAX_VALUE;
     }
 
-    /*
-        ajustei, se der tempo, vou tentar fazer o robo se direcionar ate o inimigo (ou se algm puder fazer a boa)
-    */
-    // se bater na barede, dira para o outro lado e se afasta
+    // Se bater na parede, apenas inverte a marcha para não ficar travado
     public void onHitWall(HitWallEvent e) {
         reverseDirection();
-        setTurnRight(90); 
-        setAhead(150);
     }
 
     // se bater em outro robo tenta gira para o lado oposto ao dele
@@ -66,7 +71,6 @@ public class Trojan extends AdvancedRobot {
         if (e.getBearing() > -90 && e.getBearing() <= 90) {
             reverseDirection();
         }
-        setAhead(100);
     }
 
     public void reverseDirection() {
