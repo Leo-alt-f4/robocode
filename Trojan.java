@@ -52,14 +52,21 @@ public class Trojan extends AdvancedRobot {
     }
 
     /*
-        vou ajustar hoje se der um tempo
+        ajustei, se der tempo, vou tentar fazer o robo se direcionar ate o inimigo (ou se algm puder fazer a boa)
     */
+    // se bater na barede, dira para o outro lado e se afasta
     public void onHitWall(HitWallEvent e) {
         reverseDirection();
+        setTurnRight(90); 
+        setAhead(150);
     }
 
+    // se bater em outro robo tenta gira para o lado oposto ao dele
     public void onHitRobot(HitRobotEvent e) {
-        reverseDirection();
+        if (e.getBearing() > -90 && e.getBearing() <= 90) {
+            reverseDirection();
+        }
+        setAhead(100);
     }
 
     public void reverseDirection() {
