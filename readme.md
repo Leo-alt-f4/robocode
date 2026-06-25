@@ -1,114 +1,226 @@
-## O Trojan (Cavalo de Tróia da Silva)
+# Cavalo de Tróia da Silva - O Trojan
 
-Esta documentação detalha a arquitetura, o funcionamento lógico e o histórico de desenvolvimento do robô **Trojan**, desenvolvido para a plataforma Robocode utilizando a classe `AdvancedRobot`.
+## 1. Introdução
+
+Este relatório documenta a atividade prática de desenvolvimento de um robô autônomo para a plataforma **Robocode** utilizando a linguagem de programação Java. O Robocode é um jogo de código aberto baseado em simulação que visa ensinar conceitos de programação e matemática (como geometria) através de batalhas entre tanques de guerra.
+
+Paralelamente ao desenvolvimento do software, a atividade visava a aplicação prática do controle de versão por meio do **Git** e do gerenciamento remoto no **GitHub**. O controle de versão é uma função fundamental na programação, pois permite registrar o histórico de modificações do código, reverter estados caso ocorram falhas, ramificar o desenvolvimento para testes de novas funcionalidades de forma isolada e integrar o trabalho de múltiplos programadores de maneira coordenada e segura.
+
+## 2. Objetivos da Atividade
+
+Os principais objetivos definidos para a realização desta atividade foram:
+
+* **Desenvolvimento em Java:** Praticar a lógica de programação orientada a objetos a partir da API do Robocode, utilizando a classe `AdvancedRobot` para controle refinado de movimentos e ações de forma assíncrona.
+* **Domínio do Git e GitHub:** Compreender o fluxo de trabalho profissional, incluindo criação de repositórios, ramificações (*branches*), commits estruturados e integração de código via *Pull Requests*.
+* **Trabalho em Equipe e Colaboração:** Desenvolver *soft-skills* ligadas à comunicação e coordenação técnica, garantindo que as modificações de cada integrante fossem unificadas sem perdas de progresso ou conflitos destrutivos.
+* **Construção de Lógica Competitiva:** Implementar algoritmos de mira preditiva, esquiva aleatória e gestão de energia para que o tanque fosse capaz de sobreviver em batalhas com diversos robôs.
+
+## 3. Descrição da Atividade
+
+### O Processo de Programação do Tanque (Trojan)
+
+O robô desenvolvido foi nomeado de **Trojan**. Ele foi construído herdando as propriedades da classe `AdvancedRobot`, o que permite que suas partes se movam de forma independente.
+
+A lógica interna foi estruturada da seguinte forma:
+
+1. **Rastreamento Contínuo:** No loop principal (`run`), o radar é configurado para girar indefinidamente para a direita usando `Double.POSITIVE_INFINITY`. Isso garante a varredura constante da arena.
+2. **Movimentação Antirrastreamento (Orbital):** Ao detectar um inimigo (`onScannedRobot`), o Trojan se move de forma perpendicular ao oponente (somando 90 graus ao ângulo relativo do alvo), gerando uma órbita ao redor dele. Para evitar ser um alvo previsível, o robô inverte seu sentido de direção de forma probabilística (`Math.random() > 0.99`) ou sempre que colide com paredes (`onHitWall`) ou outros robôs (`onHitRobot`).
+3. **Gerenciamento de Energia e Tiros:** A potência do tiro é inversamente proporcional à distância do alvo. Para distâncias curtas (menores que 200 pixels), dispara com potência máxima (3.0). Em distâncias longas (maiores que 600 pixels), reduz para 1.0 para economizar energia. Se a vida do robô cair abaixo de 15, ele entra em modo de sobrevivência extrema, atirando com potência mínima (0.1).
+4. **Mira Preditiva Avançada:** Utilizando conceitos matemáticos de velocidade relativa e ângulo de escape (`Math.asin`), o robô calcula onde o inimigo estará no futuro com base na velocidade atual dele e na velocidade da bala projetada, ajustando o canhão antes de efetuar o disparo.
+5. **Priorização de Alvos:** O robô mantém o foco no mesmo inimigo até que ele seja destruído (`onRobotDeath`) ou caso um novo inimigo se aproxime perigosamente (menos de 150 pixels), trocando o alvo prioritário para autodefesa.
+
+### Uso do Git para Controle de Versão e Colaboração
+
+Para o desenvolvimento, foi adotada uma abordagem incremental e iterativa. Cada alteração crítica no robô foi tratada como uma tarefa distinta: os ajustes na lógica do radar, as correções no padrão de movimentação, os refinamentos na potência dos tiros e os retoques na priorização de alvos foram codificados sequencialmente.
+
+A colaboração ocorreu dividindo o projeto em frentes de trabalho, com cada participante criando ramificações locais e subiam suas contribuições para o GitHub, onde passavam pelo sistema de Pull Request, onde o admin do repositório fazia o check-up e avaliava se passava para a `master`.
+
+## 4. Estrutura do Git Utilizada
+
+### Repositório
+
+O repositório local foi inicializado no diretório do projeto e vinculado a um repositório remoto no GitHub. Ele foi organizado de forma a conter o código-fonte principal (`Trojan.java`) e a estrutura de diretórios padrão do ambiente Robocode.
+
+### Branches (Ramificações)
+
+Para manter a estabilidade do código, foi utilizado diversas ramificações, por meio de diferentes branches e commits, permitindo testes isolados.
+Exemplos:
+
+* `master`: O ramo principal e de produção, contendo apenas versões totalmente testadas e prontas.
+* `pre-master`: Tinha a função de servir como ambiente de homologação (*staging*), onde as alterações eram unidas e validadas antes de irem em definitivo para a `master`.
+* `ultimos-ajustes`: Foi criada no fim do projeto, para armazenar as últimas funções geradas, antes de passar pela `pre-master` e receber novas avaliações.
+* *Branches de Funcionalidades (Features):* Ramos específicos como `movimento-do-robozao`, `edição-de-Prioridade`, `ajuste-projeto` e `uniao-de-branches` permitiram que implementações paralelas fossem testadas sem corromper o trabalho em andamento dos colegas.
+
+### Commits
+
+Adotamos a boa prática de commits granulares, sequenciais e com mensagens claras indicando exatamente o que foi adicionado ou corrigido. O histórico do projeto reflete essa organização através da numeração de etapas:
+
+* `a3d2837 Package importada` (Preparação do ambiente)
+* `0023e2e 1 - Ajuste no radar` (Foco inicial no escaneamento)
+* `6a77484 2 - Fixa sistema de movimento por tiro` (Movimentação básica)
+* `58449a2 3 - Ajusta a velocidade do robô e a potência dos tiros` (Calibragem dinâmica)
+* `ee9fe08 4 - Reseta quando o robo inimigo morre e ataca o outro robo` (Lógica de múltiplos alvos)
+* `5ac9cd8 5 - Melhora as funções de prioridade-alvo` (Refinamento tático)
+* `a31bf7e 6 - Adiciona variável 'enemyName' na funcao 'onRobotDeath'` (Correção de bugs)
+* `e28a863 7 - Melhora função de prioridade e movimentacao` (Otimização)
+* `83acdea Ajustes antes do envio a master` (Preparação final)
+* `48fb80b Trojan compactado` (Preparação do pacote de entrega)
+
+### Pull Requests (PRs)
+
+Os *Pull Requests* foram o mecanismo crucial para garantir que nenhuma alteração quebrasse a lógica existente. Através deles, o código modificado em ramos de desenvolvimento era submetido a uma requisição de mesclagem. Como observado no log, foram realizados com sucesso PRs para integrar as alterações ao ramo estável intermediário e, por fim, para a linha de produção principal:
+
+* `Merge pull request #6 from Leo-alt-f4/pre-master`
+* `Merge pull request #7 from Leo-alt-f4/pre-master` (Unificação final na `master`)
+
+## 5. Resultados e Aprendizados
+
+O resultado final foi altamente positivo. O robô **Trojan** demonstrou alta resiliência nas simulações, conseguindo desviar com eficácia de disparos inimigos devido à sua movimentação orbital aleatória, além de apresentar uma precisão de acerto elevada decorrente da implementação matemática da mira preditiva, o que nos levou a tratar o robô como uma espécie de 'sniper', o que inicialmente, não vinha em nossa mente.
+
+Em termos de aprendizados técnicos, a atividade proporcionou:
+
+* Compreensão profunda sobre tratamento de eventos em Java (`ScannedRobotEvent`, `HitWallEvent`, etc.).
+* Aplicação prática de trigonometria e cálculo de vetores em programação de jogos.
+* Domínio de comandos avançados do Git e resolução de fluxos complexos de ramificação.
+
+**Desafios superados:** No início, o robô perdia o foco do alvo muito facilmente em combates com muitos tanques simultâneos. O desafio foi mitigado ao implementar regras rígidas de priorização de proximidade (commit 5 e 7), onde a introdução de uma verificação de distância limiar (150 pixels) permitiu responder a ameaças urgentes sem perder a eficiência de rastreamento de longo prazo.
+
+## 6. Conclusão
+
+A elaboração do robô Trojan foi uma experiência que elevou o conhecimento sobre Java e tornou o estudo divertido. O ecossistema do Robocode exigiu a aplicação de lógicas complexas e refatoração de código, enquanto as restrições e mecânicas de trabalho em equipe via Git/GitHub começaram de forma simples e com certa dificuldade para compreender o site (GitHub), mas conforme era feito mais funções e gerações de branches, mais começamos a entender o seu funcionamento e se tornou mais fácil o uso do mesmo.
+
+A experiência consolida a importância de se escrever códigos limpos e bem documentados por meio de mensagens de commit semânticas, permitindo o crescimento escalável de projetos tecnológicos e ajudando em possíveis ajustes futuros dentro do próprio sistema.
 
 ---
 
-#### Sobre o robô "vindo dos infernos" - Trojan
+## 7. Anexos
 
-Bem, o propósito base do Trojan era ser um **tracker**. O objetivo da sua estratégia de combate consiste em localizar um alvo, travar o radar nele e orbitar ao seu redor para atirar e girar.
+### A. Código-Fonte Completo (`Trojan.java`)
 
-Dessa forma, o Trojan consegue desviar de tiros inimigos movendo-se de forma perpendicular, enquanto mantém a sua arma constantemente apontada para o oponente, disparando rajadas com potências calculadas dinamicamente com base na distância.
-
----
-
-#### Como o se comporta em combate
-
-Se você colocar o Trojan em uma batalha no Robocode, eis o que verá na tela:
-
-* **Visual:** É um robô com a base e os tiros totalmente pretos, um canhão branco e um radar vermelho piscante. 
-* **Modo de Busca:** Assim que a partida começa, a base fica parado, mas o radar vermelho gira incessantemente em 360 graus à procura de uma vítima.
-* **O Engajamento (Trava de Mira):** Quando o feixe do radar detecta um inimigo, o Trojan "trava". O radar para de girar livremente e passa a tremer rapidamente apenas em cima daquele inimigo específico.
-* **A Dança da Morte (Movimento):** Imediatamente, a base do Trojan vira de lado para o inimigo e começa a andar para a frente, criando um círculo imperfeito (uma espiral) ao redor do alvo. Se o inimigo tentar fugir, o Trojan o acompanha de lado.
-* **Disparos:** Atirará projéteis pequenos e fracos se o alvo estiver muito longe, mas conforme a espiral do Trojan o aproxima do inimigo, os tiros ficam visivelmente maiores e mais devastadores.
-* **Reação a Obstáculos:** Se o Trojan bater na parede da arena enquanto faz o seu círculo, ele dá um "solavanco", vira 90 graus para o meio da arena, engata a marcha ré e continua a atirar de onde parou.
-
----
-
-#### O Código (Como funciona)
-
-O Trojan se beneficia da classe `AdvancedRobot`, o que significa que todas as suas ações (mover a base, girar canhão e girar radar) são processadas de forma independente. 
-
-Aqui estão as partes mais vitais do código que fazem a estratégia funcionar:
-
-###### Independência Mecânica e Busca
-No método `run()`, o robô desacopla as suas partes mecânicas. Isto é vital para que o robô possa andar em círculos sem que o canhão saia da mira do inimigo.
 ```java
-setAdjustRadarForRobotTurn(true);
-setAdjustGunForRobotTurn(true);
+import robocode.*;
+import java.awt.Color;
 
-// Sempre que ele não vir um robô, vai ficar rodando até achar
-while(true) {
-    turnRadarRight(360); 
+public class Trojan extends AdvancedRobot {
+    int moveDirection = 1;
+    String trackName = null;
+
+    public void run() {
+        setBodyColor(Color.black);
+        setGunColor(Color.white);
+        setRadarColor(Color.red);
+        setBulletColor(Color.black);
+ 
+        setAdjustRadarForRobotTurn(true);
+        setAdjustGunForRobotTurn(true);
+
+        // sempre que ele nao ver um robo, ele vai ficar rodando ate achar (gira infinito para batalhas melee)
+        setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
+
+        while(true) {
+            // inverte a direcao aleatoriamente para que o movimento nao seja muito previsivel
+            if (Math.random() > 0.99) {
+                reverseDirection();
+            }
+            
+            // garante que o radar nunca pare de rodar procurando inimigos
+            if (getRadarTurnRemaining() == 0.0) {
+                setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
+            }
+            
+            execute();
+        }
+    }
+
+    public void onScannedRobot(ScannedRobotEvent e) {
+        // funcao de prioridade: foca sempre no mesmo robo, mas muda se alguem chegar muito perto
+        if (trackName == null || e.getName().equals(trackName) || e.getDistance() < 150) {
+            trackName = e.getName();
+
+            double distance = e.getDistance();
+            double absoluteBearing = getHeadingRadians() + e.getBearingRadians();
+
+            // com o robo na area do scanner, ele vai ficar rondando ao redor do robo fazendo movimento giratorio
+            setTurnRight(e.getBearing() + 90 - (10 * moveDirection));
+            setAhead(1000 * moveDirection);
+
+            // sistema de tiro melhorado com condicionais
+            double firePower;
+            if (distance > 600) {
+                firePower = 1.0;
+            } else if (distance > 400) {
+                firePower = 2.0;
+            } else if (distance > 200) {
+                firePower = 2.5;
+            } else {
+                firePower = 3.0;
+            }
+
+            // condicao de sobrevivencia para poupar energia
+            if (getEnergy() < 15) {
+                firePower = 0.1;
+            }
+
+            // calcula o movimento do inimigo para atirar onde ele vai estar (mira preditiva)
+            double bulletSpeed = 20 - (3 * firePower);
+            double lateralVelocity = e.getVelocity() * Math.sin(e.getHeadingRadians() - absoluteBearing);
+            double escapeAngle = Math.asin(lateralVelocity / bulletSpeed);
+
+            double gunTurn = absoluteBearing + escapeAngle - getGunHeadingRadians();
+            setTurnGunRightRadians(robocode.util.Utils.normalRelativeAngle(gunTurn));
+
+            // verifica se ta com um angulo bom para acertar o inimigo antes de atirar
+            if (getGunHeat() == 0 && Math.abs(getGunTurnRemaining()) < 10) {
+                setFire(firePower);
+            }
+        }
+    }
+
+    // reseta o rastreamento para o proximo ciclo caso o inimigo focado morra
+    public void onRobotDeath(RobotDeathEvent e) {
+        if (e.getName().equals(trackName)) {
+            trackName = null;
+        }
+    }
+
+    // se bater na parede, vira para o outro lado e se afasta
+    public void onHitWall(HitWallEvent e) {
+        reverseDirection();
+    }
+
+    // se bater em outro robo tenta girar para o lado oposto ao dele
+    public void onHitRobot(HitRobotEvent e) {
+        reverseDirection();
+        if (e.getBearing() > -90 && e.getBearing() <= 90) {
+            setFire(3.0);
+        }
+    }
+
+    public void reverseDirection() {
+        moveDirection *= -1;
+    }
 }
+
 ```
 
-###### O Movimento Orbital
+### B. Extrato de Logs do Git (`git log --oneline`)
 
-Dentro do método `onScannedRobot`, o Trojan calcula como se manter perpendicular (de lado) ao inimigo:
+```text
+30c0525 (HEAD -> master, origin/master, origin/HEAD) Merge pull request #7 from Leo-alt-f4/pre-master
+48fb80b (origin/pre-master, pre-master) Trojan compactado
+5303f9a Merge pull request #6 from Leo-alt-f4/pre-master
+83acdea Ajustes antes do envio a master
+e28a863 (origin/ultimos-ajustes, ultimos-ajustes) 7 - Melhora função de prioridade e movimentacao
+a31bf7e 6 - Adiciona variável 'enemyName' na funcao 'onRobotDeath'
+5ac9cd8 5 - Melhora as funções de prioridade-alvo
+ee9fe08 4 - Reseta quando o robo inimigo morre e ataca o outro robo
+58449a2 3 - Ajusta a velocidade do robô e a potência dos tiros
+6a77484 2 - Fixa sistema de movimento por tiro
+0023e2e 1 - Ajuste no radar
+a3d2837 Package importada
 
-```java
-// Com o robô na área do scanner, ele vai ficar rondando ao redor do robô fazendo movimento giratório
-setTurnRight(e.getBearing() + 90 - (10 * moveDirection));
-setAhead(100 * moveDirection);
 ```
-
-**Por que o `- (10 * moveDirection)`?** Se ele ficasse exatamente a 90 graus, faria um círculo perfeito e nunca se aproximaria. Esse desconto de 10 graus faz o Trojan andar ligeiramente na diagonal para a frente, criando uma **espiral** que encurrala o inimigo gradativamente.
-
-###### Economia Dinâmica de Energia
-
-Atirar custa a própria vida (energia) do robô. O Trojan usa condicionais (sistema de tiro melhorado) para não desperdiçar vida atirando forte em alvos muito distantes:
-
-```java
-if (distance > 600) {
-    firePower = 1.0; // Longe: Tiro fraco para poupar energia
-} else if (distance > 400) {
-    firePower = 2.0; // Média distância: Força moderada
-} else if (distance > 200) {
-    firePower = 2.5; // Perto: Tiro perigoso
-} else {
-    firePower = 3.0; // Muito perto: Força máxima
-}
-```
-
-###### O Gatilho de Precisão
-
-O Trojan não atira às cegas. Ele verifica se está com um ângulo bom para acertar no inimigo antes de atirar:
-
-```java
-double gunTurn = getHeadingRadians() + e.getBearingRadians() - getGunHeadingRadians();
-setTurnGunRightRadians(robocode.util.Utils.normalRelativeAngle(gunTurn));
-
-// Se o canhão estiver quase perfeitamente alinhado com o alvo, ele atira
-if (Math.abs(getGunTurnRemaining()) < 10) {
-    setFire(firePower);
-}
-```
-
-###### Reflexos de Sobrevivência (Colisões)
-
-Se o robô colidir na parede, ele executa uma manobra de fuga instintiva virando para o outro lado e afastando-se:
-
-```java
-public void onHitWall(HitWallEvent e) {
-    reverseDirection(); // Inverte a direção
-    setTurnRight(90);   // Gira a base
-    setAhead(150);      // Afasta-se da parede
-}
-```
-
-O mesmo acontece se bater em outro robô: ele tenta girar para o lado oposto ao dele para não ficar preso.
-
----
-
-#### Instruções de Instalação e Execução
-
-Para colocar este robô no sistema e testá-lo no seu ambiente local do Robocode, siga os passos abaixo:
-
-1. Abra o **Robocode**.
-2. No menu superior, vá ao editor de robôs (**Robot Editor**).
-3. Abra um novo arquivo de robô e cole o código contido no seu arquivo `Trojan.java`.
-4. Após isso, **'compile'** o arquivo (no menu *Compiler* -> *Compile*) e salve-o em uma pasta do Robocode.
-5. Este robô em si tem os comentários de como funciona dentro dele e não precisa de muitas explicações para rodar.
-
----
+### C. Imagens do Robô em Combate e seu Resultado
+![Trojan em ação](imagens/inicio_combate.png)
+![Trojan no fim do combate](imagens/final_combate.png)
+![Tabela com resultado de cada robô](imagens/resultados.png)
