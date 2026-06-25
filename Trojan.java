@@ -10,7 +10,7 @@ public class Trojan extends AdvancedRobot {
         setGunColor(Color.white);
         setRadarColor(Color.red);
         setBulletColor(Color.black);
-
+ 
         setAdjustRadarForRobotTurn(true);
         setAdjustGunForRobotTurn(true);
 
