@@ -14,6 +14,7 @@ public class Trojan extends AdvancedRobot {
 
         setAdjustRadarForRobotTurn(true);
         setAdjustGunForRobotTurn(true);
+        setMaxVelocity(8);
 
         // mantem o radar rodando continuamente pra uma busca melhor
         while(true) {
@@ -47,6 +48,11 @@ public class Trojan extends AdvancedRobot {
             firePower = 2.5;
         } else {
             firePower = 3.0;
+        }
+
+        // reduz potência de tiro quando a energia está baixa
+        if (getEnergy() < 15) {
+            firePower = Math.min(firePower, 1.5);
         }
         
         // verifica se ta com um angulo bom para acertar o inimigo antes de atirar
