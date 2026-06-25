@@ -98,7 +98,10 @@ public class Trojan extends AdvancedRobot {
 
     // quando um robo morre, reseta a distancia de alvo para poder escolher o proximo mais proximo
     public void onRobotDeath(RobotDeathEvent e) {
-        targetDistance = Double.MAX_VALUE;
+        if (enemyName != null && e.getName().equals(enemyName)) {
+            enemyName = null;
+            targetDistance = Double.MAX_VALUE;
+        }
     }
 
     public void reverseDirection() {
