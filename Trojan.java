@@ -34,12 +34,11 @@ public class Trojan extends AdvancedRobot {
         }
 
         // função de prioridade: se o robo escaneado for mais distante que o atual, ignora ele
-        if (distance > targetDistance) {
-            return;
+        if (enemyName == null || distance < targetDistance) {
+            enemyName = scannedName;
+            targetDistance = distance;
         }
-        
-        enemyName = scannedName;
-        targetDistance = distance;
+
         double firePower = 3.0;
 
         // com o robo na area do scanner, ele vai ficar rondando ao redor do robo fazendo movimento giratorio
@@ -70,16 +69,14 @@ public class Trojan extends AdvancedRobot {
         if (Math.abs(getGunTurnRemaining()) < 10) {
             setFire(firePower);
         }
-
-        // reseta o rastreamento para o proximo ciclo
-        targetDistance = Double.MAX_VALUE;
     }
 
     // se bater na parede, vira para o outro lado e se afasta
     public void onHitWall(HitWallEvent e) {
         reverseDirection();
-        setTurnRight(90); 
-        setAhead(150);
+        setBack(100);
+        setTurnRight(90);
+        execute();
     }
 
     // se bater em outro robo tenta girar para o lado oposto ao dele
