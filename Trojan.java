@@ -5,6 +5,7 @@ import sample.*;
 public class Trojan extends AdvancedRobot {
     int moveDirection = 1;
     double targetDistance = Double.MAX_VALUE;
+    String enemyName = null;
 
     public void run() {
         setBodyColor(Color.black);
@@ -25,12 +26,19 @@ public class Trojan extends AdvancedRobot {
 
     public void onScannedRobot(ScannedRobotEvent e) {
         double distance = e.getDistance();
+        String scannedName = e.getName();
 
-        // funcao de prioridade: Se o robo escaneado for mais distante que o atual, ignora ele
+        // se já tenho um alvo, ignora outros robôs exceto o alvo atual
+        if (enemyName != null && !enemyName.equals(scannedName)) {
+            return;
+        }
+
+        // função de prioridade: se o robo escaneado for mais distante que o atual, ignora ele
         if (distance > targetDistance) {
             return;
         }
         
+        enemyName = scannedName;
         targetDistance = distance;
         double firePower = 3.0;
 
