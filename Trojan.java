@@ -15,9 +15,10 @@ public class Trojan extends AdvancedRobot {
         setAdjustRadarForRobotTurn(true);
         setAdjustGunForRobotTurn(true);
 
-        // sempre que ele nao ver um robo, ele vai ficar rodando ate achar
+        // mantem o radar rodando continuamente pra uma busca melhor
         while(true) {
-            turnRadarRight(360);
+            setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
+            execute();
         }
     }
 
