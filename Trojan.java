@@ -76,6 +76,12 @@ public class Trojan extends AdvancedRobot {
         setAhead(100);
     }
 
+    // quando for atingido por um tiro, muda de direção para evitar novo impacto
+    public void onHitByBullet(HitByBulletEvent e) {
+        reverseDirection();
+        setAhead(150 * moveDirection);
+    }
+
     public void reverseDirection() {
         moveDirection *= -1;
     }
