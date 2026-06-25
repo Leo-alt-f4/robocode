@@ -1,11 +1,9 @@
 import robocode.*;
 import java.awt.Color;
-import sample.*;
 
 public class Trojan extends AdvancedRobot {
     int moveDirection = 1;
-    double targetDistance = Double.MAX_VALUE;
-    String enemyName = null;
+    String trackName = null;
 
     public void run() {
         setBodyColor(Color.black);
@@ -15,89 +13,86 @@ public class Trojan extends AdvancedRobot {
 
         setAdjustRadarForRobotTurn(true);
         setAdjustGunForRobotTurn(true);
-        setMaxVelocity(8);
 
-        // mantem o radar rodando continuamente pra uma busca melhor
+        // sempre que ele nao ver um robo, ele vai ficar rodando ate achar (gira infinito para batalhas melee)
+        setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
+
         while(true) {
-            setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
+            // inverte a direcao aleatoriamente para que o movimento nao seja muito previsivel
+            if (Math.random() > 0.99) {
+                reverseDirection();
+            }
+            
+            // garante que o radar nunca pare de rodar procurando inimigos
+            if (getRadarTurnRemaining() == 0.0) {
+                setTurnRadarRightRadians(Double.POSITIVE_INFINITY);
+            }
+            
             execute();
         }
     }
 
     public void onScannedRobot(ScannedRobotEvent e) {
-        double distance = e.getDistance();
-        String scannedName = e.getName();
+        // funcao de prioridade: foca sempre no mesmo robo, mas muda se alguem chegar muito perto
+        if (trackName == null || e.getName().equals(trackName) || e.getDistance() < 150) {
+            trackName = e.getName();
 
-        // se já tenho um alvo, ignora outros robôs exceto o alvo atual
-        if (enemyName != null && !enemyName.equals(scannedName)) {
-            return;
+            double distance = e.getDistance();
+            double absoluteBearing = getHeadingRadians() + e.getBearingRadians();
+
+            // com o robo na area do scanner, ele vai ficar rondando ao redor do robo fazendo movimento giratorio
+            setTurnRight(e.getBearing() + 90 - (10 * moveDirection));
+            setAhead(1000 * moveDirection);
+
+            // sistema de tiro melhorado com condicionais
+            double firePower;
+            if (distance > 600) {
+                firePower = 1.0;
+            } else if (distance > 400) {
+                firePower = 2.0;
+            } else if (distance > 200) {
+                firePower = 2.5;
+            } else {
+                firePower = 3.0;
+            }
+
+            // condicao de sobrevivencia para poupar energia
+            if (getEnergy() < 15) {
+                firePower = 0.1;
+            }
+
+            // calcula o movimento do inimigo para atirar onde ele vai estar (mira preditiva)
+            double bulletSpeed = 20 - (3 * firePower);
+            double lateralVelocity = e.getVelocity() * Math.sin(e.getHeadingRadians() - absoluteBearing);
+            double escapeAngle = Math.asin(lateralVelocity / bulletSpeed);
+
+            double gunTurn = absoluteBearing + escapeAngle - getGunHeadingRadians();
+            setTurnGunRightRadians(robocode.util.Utils.normalRelativeAngle(gunTurn));
+
+            // verifica se ta com um angulo bom para acertar o inimigo antes de atirar
+            if (getGunHeat() == 0 && Math.abs(getGunTurnRemaining()) < 10) {
+                setFire(firePower);
+            }
         }
+    }
 
-        // função de prioridade: se o robo escaneado for mais distante que o atual, ignora ele
-        if (enemyName == null || distance < targetDistance) {
-            enemyName = scannedName;
-            targetDistance = distance;
-        }
-
-        double firePower = 3.0;
-
-        // com o robo na area do scanner, ele vai ficar rondando ao redor do robo fazendo movimento giratorio
-        setTurnRadarRightRadians(robocode.util.Utils.normalRelativeAngle(getHeadingRadians() + e.getBearingRadians() - getRadarHeadingRadians()) * 2);
-        setTurnRight(e.getBearing() + 90 - (10 * moveDirection));
-        setAhead(100 * moveDirection);
-
-        // sistema de tiro melhorado com condicionais
-        if (distance > 600) {
-            firePower = 1.0;
-        } else if (distance > 400) {
-            firePower = 2.0;
-        } else if (distance > 200) {
-            firePower = 2.5;
-        } else {
-            firePower = 3.0;
-        }
-
-        // reduz potência de tiro quando a energia está baixa
-        if (getEnergy() < 15) {
-            firePower = Math.min(firePower, 1.5);
-        }
-        
-        // verifica se ta com um angulo bom para acertar o inimigo antes de atirar
-        double gunTurn = getHeadingRadians() + e.getBearingRadians() - getGunHeadingRadians();
-        setTurnGunRightRadians(robocode.util.Utils.normalRelativeAngle(gunTurn));
-
-        if (Math.abs(getGunTurnRemaining()) < 10) {
-            setFire(firePower);
+    // reseta o rastreamento para o proximo ciclo caso o inimigo focado morra
+    public void onRobotDeath(RobotDeathEvent e) {
+        if (e.getName().equals(trackName)) {
+            trackName = null;
         }
     }
 
     // se bater na parede, vira para o outro lado e se afasta
     public void onHitWall(HitWallEvent e) {
         reverseDirection();
-        setBack(100);
-        setTurnRight(90);
-        execute();
     }
 
     // se bater em outro robo tenta girar para o lado oposto ao dele
     public void onHitRobot(HitRobotEvent e) {
-        if (e.getBearing() > -90 && e.getBearing() <= 90) {
-            reverseDirection();
-        }
-        setAhead(100);
-    }
-
-    // quando for atingido por um tiro, muda de direção para evitar novo impacto
-    public void onHitByBullet(HitByBulletEvent e) {
         reverseDirection();
-        setAhead(150 * moveDirection);
-    }
-
-    // quando um robo morre, reseta a distancia de alvo para poder escolher o proximo mais proximo
-    public void onRobotDeath(RobotDeathEvent e) {
-        if (enemyName != null && e.getName().equals(enemyName)) {
-            enemyName = null;
-            targetDistance = Double.MAX_VALUE;
+        if (e.getBearing() > -90 && e.getBearing() <= 90) {
+            setFire(3.0);
         }
     }
 
